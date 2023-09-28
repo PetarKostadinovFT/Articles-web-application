@@ -15,6 +15,9 @@
   "dependencies": {
   
     
+  "@types/lodash": "^4.14.199",
+  
+    
   "axios": "^1.5.0",
   
     
@@ -54,7 +57,10 @@
   "mongosh": "^1.10.6",
   
     
-  "nodemon": "^3.0.1"
+  "nodemon": "^3.0.1",
+  
+    
+  "xml2js": "^0.6.2"
   
   },
   
