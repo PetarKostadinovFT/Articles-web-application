@@ -18,7 +18,6 @@ const fetchArticles = async (req, res) => {
         offset: offset,
       },
     };
-    console.log(offset);
 
     const cacheKey = JSON.stringify(requestBody);
 
@@ -75,6 +74,29 @@ const fetchArticleDetails = async (id) => {
   }
 };
 
+const fetchArticleGeneralDetails = async (req, res) => {
+  const id = req.params.id;
+  const cachedArticle = cache.get(id);
+  if (cachedArticle) {
+    res.json([cachedArticle]);
+    return;
+  }
+
+  try {
+    const articleUrl = `https://api.ft.com/enrichedcontent/${id}?apiKey=${apiKey}`;
+    const response = await axios.get(articleUrl);
+    const articleData = response.data;
+
+    cache.put(id, articleData, 60 * 1000);
+
+    res.json([articleData]);
+  } catch (error) {
+    throw new Error(
+      `Error fetching article details for ID ${id}: ${error.message}`
+    );
+  }
+};
 module.exports = {
   fetchArticles,
+  fetchArticleGeneralDetails,
 };

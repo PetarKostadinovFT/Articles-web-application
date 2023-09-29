@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const cors = require("cors");
-const { fetchArticles } = require("../controllers/newsController.js");
+const {
+  fetchArticles,
+  fetchArticleGeneralDetails,
+} = require("../controllers/newsController.js");
 
 const newsRouter = express.Router();
 newsRouter.use(
@@ -12,5 +15,6 @@ newsRouter.use(
 );
 
 newsRouter.post("/home", fetchArticles);
+newsRouter.get("/:id", fetchArticleGeneralDetails);
 
 module.exports = newsRouter;
