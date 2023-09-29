@@ -47,8 +47,6 @@ function Home(): JSX.Element {
     setCurrPage(pageNumber - 1);
   };
 
-  console.log(allArticles);
-
   return (
     <>
       <div className="o-layout" data-o-component="o-layout">

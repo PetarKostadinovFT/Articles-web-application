@@ -1,20 +1,12 @@
 import { Link } from "react-router-dom";
-import {
-  IArticle,
-  Member,
-  MemberObject,
-} from "../interfaces/artticleInterface";
+import { IArticle } from "../interfaces/artticleInterface";
+import { getImageUrl } from "../utils/getImageUrl";
 
 function Article({ article }: { article: IArticle }) {
-  let imageUrl = "";
+  const imageUrl = getImageUrl(article);
 
-  if (Array.isArray(article.mainImage.members)) {
-    if (article.mainImage.members.length > 0) {
-      imageUrl = (article.mainImage.members[0] as Member).binaryUrl;
-    }
-  } else if (article.mainImage.members) {
-    imageUrl = (article.mainImage.members as MemberObject).binaryUrl;
-  }
+  const parts = article.id.split("/");
+  const id = parts.pop();
 
   return (
     <div
@@ -26,7 +18,7 @@ function Article({ article }: { article: IArticle }) {
           <Link
             className="o-teaser__tag"
             data-trackable="teaser-tag"
-            to="/details"
+            to={`/details/${id}`}
             aria-label="Category: Sexual misconduct allegations"
           >
             {article.mainImage.description}
@@ -34,7 +26,7 @@ function Article({ article }: { article: IArticle }) {
         </div>
         <div className="o-teaser__heading">
           <Link
-            to="/details"
+            to={`/details/${id}`}
             data-trackable="heading-link"
             className="js-teaser-heading-link"
           >
@@ -43,7 +35,7 @@ function Article({ article }: { article: IArticle }) {
         </div>
         <p className="o-teaser__standfirst">
           <Link
-            to="/details"
+            to={`/details/${id}`}
             data-trackable="standfirst-link"
             tabIndex={-1}
             className="js-teaser-standfirst-link"
@@ -54,7 +46,7 @@ function Article({ article }: { article: IArticle }) {
       </div>
       <div className="o-teaser__image-container js-teaser-image-container">
         <Link
-          to="/details"
+          to={`/details/${id}`}
           data-trackable="image-link"
           tabIndex={-1}
           aria-hidden="true"

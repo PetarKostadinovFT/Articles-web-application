@@ -1,18 +1,29 @@
-import React, { useContext, useEffect } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
+import { fetchArticleDetails } from "../utils/fetchArticleDetails";
+import { getImageUrl } from "../utils/getImageUrl";
+import { IArticle } from "../interfaces/artticleInterface";
 
-function ProductScreen() {
-  const navigate = useNavigate();
+function Details() {
+  const [article, setArticle] = useState<IArticle[]>([]);
+  const { id } = useParams<{ id: string }>();
 
-  const params = useParams();
-  const { id } = params;
+  useEffect(() => {
+    async function fetchArticle() {
+      try {
+        const response = await fetchArticleDetails(id);
 
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState("");
-  const [product, setProduct] = React.useState([]);
+        setArticle(response);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    fetchArticle();
+  }, [id]);
 
-  useEffect(() => {}, []);
-
+  const selectedArticle = article.length > 0 ? article[0] : null;
+  const imageUrl = selectedArticle ? getImageUrl(selectedArticle) : "";
+  const title = selectedArticle ? selectedArticle.title : "";
   return (
     <>
       <div
@@ -24,14 +35,14 @@ function ProductScreen() {
             <Link
               className="o-teaser__tag"
               data-trackable="teaser-tag"
-              to="#"
+              to="https://www.ft.com/magazine"
               aria-label="Category: FT Magazine"
             >
               FT Magazine
             </Link>
           </div>
           <div className="o-teaser__heading">
-            <p>The royal wedding</p>
+            <p>{title}</p>
             <p className="o-layout__main o-layout-typography">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex velit
               beatae saepe adipisci consectetur. Alias nesciunt aliquam saepe?
@@ -53,11 +64,7 @@ function ProductScreen() {
             className="o-teaser__image-placeholder"
             style={{ paddingBottom: "56.2500%" }}
           >
-            <img
-              className="o-teaser__image"
-              src="https://www.ft.com/__origami/service/image/v2/images/raw/http%3A%2F%2Fprod-upp-image-read.ft.com%2F7e97f5b6-578d-11e8-b8b2-d6ceb45fa9d0?source=next&fit=scale-down&dpr=2&width=340"
-              alt=""
-            />
+            <img className="o-teaser__image" src={imageUrl} alt="" />
           </div>
         </div>
       </div>
@@ -269,4 +276,4 @@ function ProductScreen() {
   );
 }
 
-export default ProductScreen;
+export default Details;
