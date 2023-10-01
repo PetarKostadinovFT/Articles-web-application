@@ -14,7 +14,6 @@ newsRouter.use(
   })
 );
 
-newsRouter.post("/home", fetchArticles);
-newsRouter.get("/:id", fetchArticleGeneralDetails);
+newsRouter.post("/:pageNumber", fetchArticles);
 
 module.exports = newsRouter;

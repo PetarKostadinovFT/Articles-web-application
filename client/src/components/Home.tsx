@@ -1,35 +1,63 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Article from "./Article";
 import _ from "lodash";
 import { useAuth } from "../context/userContext";
-import useArticleFetch from "../utils/useArticleFetch";
-import { Link } from "react-router-dom";
+import { useArticle } from "../context/ArticlesContext";
+import { Link, useNavigate } from "react-router-dom";
+import { fetchArticles } from "../utils/fetchArticles";
+import { useParams } from "react-router-dom";
 
-function Home(): JSX.Element {
+function Home() {
   const { isAuthenticated } = useAuth();
-
-  const {
-    allArticles,
-    queryString,
-    handleSearchChange,
-    fetchArticles,
-    pageNumber,
-    setCurrPage,
-  } = useArticleFetch();
-
+  const { articles, loading, setArticles } = useArticle();
+  const [queryString, setQueryString] = useState<string>("");
+  const [currPage, setCurrPage] = useState<number>(1);
   const delayTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const { pageNumber } = useParams();
+  const navigate = useNavigate();
+  const pageFromUrl = Number(pageNumber);
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setQueryString(event.target.value);
+  };
+
+  const handleNextPage = () => {
+    const nextPage = currPage + 1;
+    setCurrPage(nextPage);
+    navigate(`/articles/page/${nextPage}`);
+  };
+
+  const handlePrevPage = () => {
+    if (currPage > 1) {
+      const prevPage = currPage - 1;
+      setCurrPage(prevPage);
+      navigate(`/articles/page/${prevPage}`);
+    }
+  };
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     if (queryString) {
       if (delayTimerRef.current) {
         clearTimeout(delayTimerRef.current);
       }
 
       delayTimerRef.current = setTimeout(() => {
-        fetchArticles();
+        fetchArticles(queryString, pageFromUrl).then((fetchedArticles) => {
+          if (fetchedArticles) {
+            setArticles(fetchedArticles);
+          } else {
+            setArticles([]);
+          }
+        });
       }, 1000);
     } else {
-      fetchArticles();
+      fetchArticles(queryString, pageFromUrl).then((fetchedArticles) => {
+        if (fetchedArticles) {
+          setArticles(fetchedArticles);
+        } else {
+          setArticles([]);
+        }
+      });
     }
 
     return () => {
@@ -37,15 +65,10 @@ function Home(): JSX.Element {
         clearTimeout(delayTimerRef.current);
       }
     };
-  }, [queryString, isAuthenticated, pageNumber]);
+  }, [queryString, isAuthenticated, pageFromUrl]);
 
-  const handleNextPage = () => {
-    setCurrPage(pageNumber + 1);
-  };
-
-  const handlePrevPage = () => {
-    setCurrPage(pageNumber - 1);
-  };
+  const totalPages = 6;
+  const pagesToShow = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
     <>
@@ -72,7 +95,7 @@ function Home(): JSX.Element {
             <h3 id="sub-section-2">Latest News</h3>
             <div>
               <div className="row">
-                {allArticles.map((article) => (
+                {articles.map((article) => (
                   <Article key={article.id} article={article} />
                 ))}
               </div>
@@ -81,28 +104,26 @@ function Home(): JSX.Element {
                 <button
                   onClick={handlePrevPage}
                   className="o-buttons o-buttons--big o-buttons--secondary o-buttons-icon o-buttons-icon--arrow-left o-buttons-icon--icon-only"
-                  disabled={pageNumber === 1}
+                  disabled={pageFromUrl === 1}
                 >
                   <span className="o-buttons-icon__label">
                     Previous results
                   </span>
                 </button>
-                {[0, 1, 2, 3, 4, 5].map((pageNumber) => (
+                {pagesToShow.map((pageNumber) => (
                   <Link
-                    to="#"
+                    to={`/articles/page/${pageNumber}`}
                     key={pageNumber}
-                    className={`o-buttons o-buttons--big o-buttons--secondary ${
-                      pageNumber * 6 === pageNumber ? "active" : ""
-                    }`}
-                    onClick={() => setCurrPage(pageNumber + 1)}
+                    className={`o-buttons o-buttons--big o-buttons--secondary `}
+                    onClick={() => setCurrPage(pageNumber)}
                   >
-                    {pageNumber + 1}
+                    {pageNumber}
                   </Link>
                 ))}
                 <button
                   onClick={handleNextPage}
                   className="o-buttons o-buttons--big o-buttons--secondary o-buttons-icon o-buttons-icon--arrow-right o-buttons-icon--icon-only"
-                  disabled={pageNumber === 6}
+                  disabled={pageFromUrl === 6}
                 >
                   <span className="o-buttons-icon__label">Next results</span>
                 </button>

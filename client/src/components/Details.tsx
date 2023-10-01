@@ -1,29 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import { fetchArticleDetails } from "../utils/fetchArticleDetails";
 import { getImageUrl } from "../utils/getImageUrl";
 import { IArticle } from "../interfaces/artticleInterface";
+import { useArticle } from "../context/ArticlesContext";
 
 function Details() {
-  const [article, setArticle] = useState<IArticle[]>([]);
-  const { id } = useParams<{ id: string }>();
+  window.scrollTo(0, 0);
+  const { id = "" } = useParams<{ id?: string }>();
+  const { articles, loading } = useArticle();
+  const selectedArticle = articles.find((article) =>
+    article.id.includes(id)
+  ) as IArticle;
+  if (!selectedArticle && !loading) {
+    return <div>Article not found</div>;
+  }
 
-  useEffect(() => {
-    async function fetchArticle() {
-      try {
-        const response = await fetchArticleDetails(id);
+  const imageUrl = getImageUrl(selectedArticle);
+  console.log(selectedArticle);
 
-        setArticle(response);
-      } catch (err) {
-        console.log(err);
-      }
-    }
-    fetchArticle();
-  }, [id]);
-
-  const selectedArticle = article.length > 0 ? article[0] : null;
-  const imageUrl = selectedArticle ? getImageUrl(selectedArticle) : "";
-  const title = selectedArticle ? selectedArticle.title : "";
   return (
     <>
       <div
@@ -42,7 +36,7 @@ function Details() {
             </Link>
           </div>
           <div className="o-teaser__heading">
-            <p>{title}</p>
+            <p>{selectedArticle.title}</p>
             <p className="o-layout__main o-layout-typography">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex velit
               beatae saepe adipisci consectetur. Alias nesciunt aliquam saepe?

@@ -1,13 +1,14 @@
 const axios = require("axios");
 const cache = require("memory-cache");
 
-const apiKey = "59cbaf20e3e06d3565778e7b9898d7aef5804f19987220f42b799c70";
+const apiKey = process.env.apiKey;
 const cacheDuration = 20 * 60 * 1000; //
 const searchUrl = `https://api.ft.com/content/search/v1?apiKey=${apiKey}`;
 
 const fetchArticles = async (req, res) => {
   try {
     const { queryString, pageNumber } = req.body;
+
     const maxResults = 6;
     const offset = (pageNumber - 1) * maxResults;
 

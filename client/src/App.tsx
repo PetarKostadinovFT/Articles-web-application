@@ -5,17 +5,19 @@ import "./App.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Details from "./components/Details";
+import { ArticleProvider } from "./context/ArticlesContext";
 
 function App() {
   return (
     <Router>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/details/:id" element={<Details />} />
-      </Routes>
-      <Footer />
+      <ArticleProvider>
+        <Header />
+        <Routes>
+          <Route path="/articles/page/:pageNumber" element={<Home />} />
+          <Route path="/details/:id" element={<Details />} />
+        </Routes>
+        <Footer />
+      </ArticleProvider>
     </Router>
   );
 }

@@ -4,10 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { logout } from "../utils/logoutUtils";
 import { useAuth } from "../context/userContext";
 import { toast } from "react-hot-toast";
+import { useArticle } from "../context/ArticlesContext";
 
 function Header(): JSX.Element {
   const navigate = useNavigate();
   const { isAuthenticated, setIsAuthenticated } = useAuth();
+  const { currPage } = useArticle();
 
   const logoutHandler = async (): Promise<void> => {
     const success: boolean = await logout(setIsAuthenticated);
@@ -53,7 +55,10 @@ function Header(): JSX.Element {
         <div className="o-header__container">
           <ul className="o-header__nav-list o-header__nav-list--right">
             <li className="o-header__nav-item">
-              <Link className="o-header__nav-link" to="/home">
+              <Link
+                className="o-header__nav-link"
+                to={`/articles/page/${currPage}`}
+              >
                 Home
               </Link>
             </li>

@@ -10,7 +10,7 @@ export async function fetchArticles(queryString: string, pageNumber:number): Pro
     };
 
     const response: AxiosResponse<IArticle[]> = await axios.post(
-      "/api/articles/home",
+      `/api/articles/page/${pageNumber}`,
       {
         queryString,
         pageNumber,    

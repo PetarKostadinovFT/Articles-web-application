@@ -21,7 +21,7 @@ function Article({ article }: { article: IArticle }) {
             to={`/details/${id}`}
             aria-label="Category: Sexual misconduct allegations"
           >
-            {article.mainImage.description}
+            {article.standfirst}
           </Link>
         </div>
         <div className="o-teaser__heading">
@@ -40,7 +40,7 @@ function Article({ article }: { article: IArticle }) {
             tabIndex={-1}
             className="js-teaser-standfirst-link"
           >
-            {article.standfirst}
+            {article.mainImage.description}
           </Link>
         </p>
       </div>
@@ -55,9 +55,11 @@ function Article({ article }: { article: IArticle }) {
             className="o-teaser__image-placeholder"
             style={{ paddingBottom: "56.2500%" }}
           >
-            {imageUrl && (
-              <img className="o-teaser__image" src={imageUrl} alt="Article" />
-            )}
+            <img
+              className="o-teaser__image"
+              src={imageUrl}
+              alt="Financial Times"
+            />
           </div>
         </Link>
       </div>
