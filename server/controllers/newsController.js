@@ -1,14 +1,33 @@
 const axios = require("axios");
 const cache = require("memory-cache");
+const jwt = require("jsonwebtoken");
 
-const apiKey = "59cbaf20e3e06d3565778e7b9898d7aef5804f19987220f42b799c70";
+const apiKey = process.env.apiKey;
 const cacheDuration = 20 * 60 * 1000; //
-const searchUrl = `https://api.ft.com/content/search/v1?apiKey=${apiKey}`;
+const searchUrl = `${process.env.searchUrl}${apiKey}`;
+
+const detailedDataCache = new Map();
 
 const fetchArticles = async (req, res) => {
+  let maxResults = 3;
   try {
     const { queryString, pageNumber } = req.body;
-    const maxResults = 6;
+
+    if (req.headers.authorization) {
+      try {
+        jwt.verify(
+          req.headers.authorization.split(" ")[1],
+          process.env.JWT_SECRET
+        );
+
+        maxResults = 6;
+      } catch (error) {
+        maxResults = 3;
+      }
+    } else {
+      maxResults = 6;
+    }
+
     const offset = (pageNumber - 1) * maxResults;
 
     const requestBody = {
@@ -23,8 +42,20 @@ const fetchArticles = async (req, res) => {
 
     const cachedData = cache.get(cacheKey);
 
-    if (cachedData) {
-      res.json(cachedData);
+    if (cachedData && queryString === "") {
+      const filteredData = cachedData.map((item) => ({
+        id: item.id,
+        title: item.title,
+        standfirst: item.standfirst,
+        mainImage: {
+          description: item.mainImage
+            ? item.mainImage.description
+            : "Read more",
+          members: item.mainImage ? item.mainImage.members : "",
+        },
+      }));
+
+      res.json(filteredData);
       return;
     }
 
@@ -35,24 +66,40 @@ const fetchArticles = async (req, res) => {
     });
 
     const articleData = response.data.results;
-
     const stringifyed = JSON.stringify(articleData);
     const data = JSON.parse(stringifyed);
+
     const articleIds = data[0].results.map((item) => item.id);
 
     let detailedContent = [];
     for (let id of articleIds) {
-      const singleDetailedInfo = await fetchArticleDetails(id);
+      let singleDetailedInfo = detailedDataCache.get(id);
+
+      if (!singleDetailedInfo) {
+        singleDetailedInfo = await fetchArticleDetails(id);
+        detailedDataCache.set(id, singleDetailedInfo);
+      }
+
       detailedContent.push(singleDetailedInfo);
     }
 
-    cache.put(cacheKey, detailedContent, cacheDuration);
+    const filteredData = detailedContent.map((item) => ({
+      id: item.id,
+      title: item.title,
+      standfirst: item.standfirst,
+      mainImage: {
+        description: item.mainImage ? item.mainImage.description : "Read more",
+        members: item.mainImage ? item.mainImage.members : "",
+      },
+    }));
+    cache.put(cacheKey, filteredData, cacheDuration);
 
-    res.json(detailedContent);
+    res.json(filteredData);
   } catch (error) {
     console.error("Error:", error.message);
   }
 };
+
 const fetchArticleDetails = async (id) => {
   try {
     const cachedArticle = cache.get(`article_${id}`);
@@ -76,26 +123,23 @@ const fetchArticleDetails = async (id) => {
 
 const fetchArticleGeneralDetails = async (req, res) => {
   const id = req.params.id;
-  const cachedArticle = cache.get(id);
+  const cachedArticle = detailedDataCache.get(id);
+
   if (cachedArticle) {
     res.json([cachedArticle]);
     return;
   }
 
   try {
-    const articleUrl = `https://api.ft.com/enrichedcontent/${id}?apiKey=${apiKey}`;
-    const response = await axios.get(articleUrl);
-    const articleData = response.data;
-
-    cache.put(id, articleData, 60 * 1000);
-
-    res.json([articleData]);
+    // If the data is not in the cache ????
+    res.json([]);
   } catch (error) {
     throw new Error(
       `Error fetching article details for ID ${id}: ${error.message}`
     );
   }
 };
+
 module.exports = {
   fetchArticles,
   fetchArticleGeneralDetails,

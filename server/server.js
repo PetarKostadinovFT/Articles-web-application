@@ -22,8 +22,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 
-app.use("/api/articles", require("./routes/newsRoutes"));
+app.use("/api/articles/page", require("./routes/newsRoutes"));
 app.use("/api/details", require("./routes/newsRoutes"));
+
 app.use("/api/users", require("./routes/userRoutes"));
 
 app.listen(PORT, () => {
