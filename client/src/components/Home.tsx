@@ -1,133 +1,121 @@
 import React, { useEffect, useRef, useState } from "react";
 import Article from "./Article";
+import TopBaner from "./TopBaner";
 import _ from "lodash";
 import { useAuth } from "../context/userContext";
-import { useArticle } from "../context/ArticlesContext";
+import { IArticle } from "../interfaces/artticleInterface";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchArticles } from "../utils/fetchArticles";
 import { useParams } from "react-router-dom";
+import Pagination from "./Pagination";
+import Loading from "../helpersComponent/Loading";
 
 function Home() {
-  const { isAuthenticated } = useAuth();
-  const { articles, loading, setArticles } = useArticle();
-  const [queryString, setQueryString] = useState<string>("");
-  const [currPage, setCurrPage] = useState<number>(1);
-  const delayTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const { pageNumber } = useParams();
+  window.scrollTo(0, 0);
   const navigate = useNavigate();
+  const delayTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated } = useAuth();
+  const { pageNumber } = useParams();
   const pageFromUrl = Number(pageNumber);
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setQueryString(event.target.value);
-  };
+
+  const [currPage, setCurrPage] = useState<number>(1);
+  const [allArticles, setAllArticles] = useState<IArticle[]>([]);
+  const [queryString, setQueryString] = useState<string>("");
 
   const handleNextPage = () => {
-    const nextPage = currPage + 1;
+    const nextPage = pageFromUrl + 1;
     setCurrPage(nextPage);
     navigate(`/articles/page/${nextPage}`);
   };
 
   const handlePrevPage = () => {
-    if (currPage > 1) {
-      const prevPage = currPage - 1;
+    if (pageFromUrl > 1) {
+      const prevPage = pageFromUrl - 1;
       setCurrPage(prevPage);
       navigate(`/articles/page/${prevPage}`);
     }
   };
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-    if (queryString) {
-      if (delayTimerRef.current) {
-        clearTimeout(delayTimerRef.current);
-      }
-
-      delayTimerRef.current = setTimeout(() => {
-        fetchArticles(queryString, pageFromUrl).then((fetchedArticles) => {
-          if (fetchedArticles) {
-            setArticles(fetchedArticles);
-          } else {
-            setArticles([]);
-          }
-        });
-      }, 1000);
-    } else {
-      fetchArticles(queryString, pageFromUrl).then((fetchedArticles) => {
-        if (fetchedArticles) {
-          setArticles(fetchedArticles);
-        } else {
-          setArticles([]);
+    setIsLoading(true);
+    async function fetchData() {
+      if (queryString) {
+        if (delayTimerRef.current) {
+          clearTimeout(delayTimerRef.current);
         }
-      });
-    }
 
-    return () => {
-      if (delayTimerRef.current) {
-        clearTimeout(delayTimerRef.current);
+        delayTimerRef.current = setTimeout(async () => {
+          const response = await fetchArticles(queryString, pageFromUrl);
+          setAllArticles(response);
+        }, 1000);
+      } else {
+        const response = await fetchArticles(queryString, pageFromUrl);
+        setAllArticles(response);
       }
-    };
-  }, [queryString, isAuthenticated, pageFromUrl]);
+
+      return () => {
+        if (delayTimerRef.current) {
+          clearTimeout(delayTimerRef.current);
+        }
+      };
+    }
+    fetchData();
+    setIsLoading(false);
+  }, [queryString, pageFromUrl, currPage]);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setQueryString(event.target.value);
+  };
 
   const totalPages = 6;
-  const pagesToShow = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
     <>
       <div className="o-layout" data-o-component="o-layout">
         <div className="o-layout__header"></div>
-        <div className="o-layout__main o-layout-typography">
+        <div className="o-layout__main ">
+          {!isAuthenticated && <TopBaner />}
           <div data-o-component="o-syntax-highlight">
-            <div className="col-md-4">
-              <div className="sidebar pt-4">
-                <h3>Search News</h3>
-                <div className="mb-3">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Search by title..."
-                    value={queryString}
-                    onChange={handleSearchChange}
-                  />
+            {isAuthenticated && (
+              <div className="col-md-4">
+                <div className="sidebar pt-4">
+                  <h3>Search News</h3>
+                  <div className="mb-3">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Search by title..."
+                      value={queryString}
+                      onChange={handleSearchChange}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
             <br className="demo-break" />
             <br className="demo-break" />
             <h3 id="sub-section-2">Latest News</h3>
             <div>
               <div className="row">
-                {articles.map((article) => (
-                  <Article key={article.id} article={article} />
-                ))}
+                {isLoading ? (
+                  <Loading />
+                ) : (
+                  allArticles.map((article) => (
+                    <Article key={article.id} article={article} />
+                  ))
+                )}
               </div>
+
               {/* Pagination controls */}
-              <div className="o-buttons-pagination">
-                <button
-                  onClick={handlePrevPage}
-                  className="o-buttons o-buttons--big o-buttons--secondary o-buttons-icon o-buttons-icon--arrow-left o-buttons-icon--icon-only"
-                  disabled={pageFromUrl === 1}
-                >
-                  <span className="o-buttons-icon__label">
-                    Previous results
-                  </span>
-                </button>
-                {pagesToShow.map((pageNumber) => (
-                  <Link
-                    to={`/articles/page/${pageNumber}`}
-                    key={pageNumber}
-                    className={`o-buttons o-buttons--big o-buttons--secondary `}
-                    onClick={() => setCurrPage(pageNumber)}
-                  >
-                    {pageNumber}
-                  </Link>
-                ))}
-                <button
-                  onClick={handleNextPage}
-                  className="o-buttons o-buttons--big o-buttons--secondary o-buttons-icon o-buttons-icon--arrow-right o-buttons-icon--icon-only"
-                  disabled={pageFromUrl === 6}
-                >
-                  <span className="o-buttons-icon__label">Next results</span>
-                </button>
-              </div>
+              {isAuthenticated && (
+                <Pagination
+                  currPage={currPage}
+                  totalPages={totalPages}
+                  handlePrevPage={handlePrevPage}
+                  handleNextPage={handleNextPage}
+                />
+              )}
               <br className="demo-break" />
             </div>
             <h2 id="tables">Tables</h2>
@@ -148,21 +136,10 @@ function Home() {
               rem libero inventore ab nisi pariatur!
             </p>
             <blockquote>
-              <p>
-                Blockquote... lorem ipsum dolor sit amet, consectetur
-                adipisicing elit. Omnis ea suscipit iusto perspiciatis harum,
-                qui maxime necessitatibus facilis, quo natus rem accusamus
-                autem! Magnam pariatur, perferendis molestiae et tenetur
-                repudiandae.
-              </p>
+              <p>{}</p>
               <footer>by Origami Team</footer>
             </blockquote>
-            <p>
-              Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ullam
-              doloribus eum maiores dolor ipsam expedita aut rerum animi soluta
-              veritatis eaque quia quisquam, ratione tenetur facere iste cum
-              quos? Repudiandae?
-            </p>
+            <p>{}</p>
             <div className="o-layout__main__full-span">
               <div className="o-table-container">
                 <div className="o-table-overlay-wrapper">

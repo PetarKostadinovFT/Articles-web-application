@@ -55,11 +55,19 @@ function Article({ article }: { article: IArticle }) {
             className="o-teaser__image-placeholder"
             style={{ paddingBottom: "56.2500%" }}
           >
-            <img
-              className="o-teaser__image"
-              src={imageUrl}
-              alt="Financial Times"
-            />
+            {imageUrl ? (
+              <img
+                className="o-teaser__image"
+                src={imageUrl}
+                alt="Financial Times"
+              />
+            ) : (
+              <img
+                className="o-teaser__image"
+                src="/images/screenshot.png"
+                alt="Financial Times"
+              />
+            )}
           </div>
         </Link>
       </div>

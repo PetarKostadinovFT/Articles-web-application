@@ -20,6 +20,8 @@
     "react-hot-toast": "^2.4.1",
     "react-router-dom": "^6.16.0",
     "react-scripts": "5.0.1",
+    "react-xml-parser": "^1.1.8",
+    "sass": "^1.68.0",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
@@ -55,6 +57,7 @@
     "@financial-times/o-colors": "^6.6.2",
     "@financial-times/o-editorial-layout": "^2.4.2",
     "@financial-times/o-footer": "^9.2.8",
+    "@financial-times/o-forms": "^9.12.0",
     "@financial-times/o-grid": "^6.1.7",
     "@financial-times/o-header": "^11.1.0",
     "@financial-times/o-layout": "^5.3.3",
