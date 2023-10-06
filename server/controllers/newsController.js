@@ -107,7 +107,7 @@ const fetchArticleDetails = async (id) => {
       return cachedArticle;
     }
 
-    const articleUrl = `https://api.ft.com/enrichedcontent/${id}?apiKey=${apiKey}`;
+    const articleUrl = `${process.env.enrichedContentApi}${id}?apiKey=${apiKey}`;
     const response = await axios.get(articleUrl);
     const articleData = response.data;
 
@@ -131,7 +131,6 @@ const fetchArticleGeneralDetails = async (req, res) => {
   }
 
   try {
-    // If the data is not in the cache ????
     res.json([]);
   } catch (error) {
     throw new Error(

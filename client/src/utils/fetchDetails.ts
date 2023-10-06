@@ -1,5 +1,4 @@
 import axios, { AxiosResponse } from "axios";
-import Cookies from "js-cookie";
 import { IArticle } from "../interfaces/artticleInterface";
 
 export async function fetchDetails(id:any): Promise<IArticle[]> {

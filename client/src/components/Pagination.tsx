@@ -15,7 +15,7 @@ function Pagination({
 }: PaginationProps) {
   const { pageNumber } = useParams();
   const pageFromUrl = Number(pageNumber);
-  let dots: number | string = "...";
+  let dots: string = "...";
   if (pageFromUrl > 7) {
     totalPages = 7;
   }
@@ -32,7 +32,7 @@ function Pagination({
     pagesToShow.splice(3, 1, dots);
     pagesToShow.splice(0, 3, 1, 2, 3);
   }
-  dots = pageFromUrl - 3;
+
   return (
     <div className="o-buttons-pagination">
       <button

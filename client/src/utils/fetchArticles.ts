@@ -1,8 +1,8 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import Cookies from "js-cookie";
 import { IArticle } from "../interfaces/artticleInterface";
 
-export async function fetchArticles(queryString: string, pageNumber:number): Promise<IArticle[]> {
+export async function fetchArticles(queryString: string, pageNumber: number): Promise<IArticle[]> {
   try {
     const token = Cookies.get("token");
     const headers = {
@@ -13,7 +13,7 @@ export async function fetchArticles(queryString: string, pageNumber:number): Pro
       `/api/articles/page/${pageNumber}`,
       {
         queryString,
-        pageNumber,    
+        pageNumber,
       },
       {
         headers,
@@ -22,6 +22,13 @@ export async function fetchArticles(queryString: string, pageNumber:number): Pro
 
     return response.data;
   } catch (error) {
-    throw error;
+    // Explicitly cast error to AxiosError
+    const axiosError = error as AxiosError;
+
+    // Handle the error as needed, e.g., logging or rethrowing
+    console.error(axiosError);
+
+    // Rethrow the error or return an empty array based on your logic
+    throw axiosError;
   }
 }
