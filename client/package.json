@@ -7,14 +7,20 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
     "@types/node": "^16.18.53",
     "@types/react": "^18.2.22",
     "@types/react-dom": "^18.2.7",
     "axios": "^1.5.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-markdown": "^3.0.1",
+    "jest-environment-jsdom": "^29.7.0",
     "js-cookie": "^3.0.5",
     "lodash": "^4.17.21",
     "origami": "^0.3.0",
+    "peerdeps": "^1.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1",
@@ -28,7 +34,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "jest",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -50,19 +56,10 @@
     ]
   },
   "devDependencies": {
+    "@testing-library/react-hooks": "^5.0.0-beta.12",
+    "@types/jest": "^29.5.5",
     "@types/js-cookie": "^3.0.4",
-    "@types/lodash": "^4.14.199"
-  },
-  "peerDependencies": {
-    "@financial-times/o-colors": "^6.6.2",
-    "@financial-times/o-editorial-layout": "^2.4.2",
-    "@financial-times/o-footer": "^9.2.8",
-    "@financial-times/o-forms": "^9.12.0",
-    "@financial-times/o-grid": "^6.1.7",
-    "@financial-times/o-header": "^11.1.0",
-    "@financial-times/o-layout": "^5.3.3",
-    "@financial-times/o-table": "^9.3.2",
-    "@financial-times/o-teaser": "^6.2.8",
-    "@financial-times/o-typography": "^7.5.0"
+    "@types/lodash": "^4.14.199",
+    "ts-jest": "^29.1.1"
   }
 }

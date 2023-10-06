@@ -22,7 +22,7 @@ function App() {
       <Header />
       <Toaster
         data-testid="toaster-mock"
-        position="bottom-right"
+        position="top-right"
         toastOptions={{ duration: 3500 }}
       />
       <Routes>

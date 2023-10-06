@@ -1,66 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getImageUrl } from "../utils/getImageUrl";
 import { IArticle } from "../interfaces/artticleInterface";
-import { fetchDetails } from "../utils/fetchDetails";
+import {
+  fetchArticleDetails,
+  prepareBodyText,
+  getImageUrlOrDefault,
+} from "../utils/detailsFunctions";
 
 function Details() {
   const [article, setArticle] = useState<IArticle[]>([]);
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id?: string }>();
 
   useEffect(() => {
     window.scrollTo(0, 0);
     async function fetchArticle() {
-      try {
-        const response = await fetchDetails(id);
+      if (id) {
+        const response = await fetchArticleDetails(id);
         setArticle(response);
-      } catch (err) {
-        console.log(err);
       }
     }
-    fetchArticle();
+    if (id) {
+      fetchArticle();
+    }
   }, [id]);
 
-  function extractTextFromXML(node: Node, count: number) {
-    let text = "";
-
-    if (node.nodeType === Node.TEXT_NODE) {
-      text += node.textContent;
-    }
-
-    if (node.childNodes.length > 0) {
-      for (let i = 0; i < node.childNodes.length; i++) {
-        text += extractTextFromXML(node.childNodes[i], count);
-      }
-    }
-    return text;
-  }
-
   const selectedArticle = article.length > 0 ? article[0] : null;
-  const bodyText: { [key: string]: string } = {};
-
-  if (selectedArticle && selectedArticle.bodyXML) {
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(
-      selectedArticle.bodyXML,
-      "application/xml"
-    );
-
-    let tagCount = 1;
-
-    const rootNode = xmlDoc.documentElement;
-    for (let i = 0; i < rootNode.childNodes.length; i++) {
-      const tagText = extractTextFromXML(rootNode.childNodes[i], tagCount);
-      if (tagText) {
-        bodyText[`bodyText${tagCount}`] = tagText.trim();
-        tagCount++;
-      }
-    }
-  }
-
-  const imageUrl = selectedArticle ? getImageUrl(selectedArticle) : "";
+  const bodyText = prepareBodyText(selectedArticle);
+  const imageUrl = getImageUrlOrDefault(selectedArticle);
   const title = selectedArticle ? selectedArticle.title : "";
-
   return (
     <>
       <div
@@ -90,7 +57,15 @@ function Details() {
             className="o-teaser__image-placeholder"
             style={{ paddingBottom: "56.2500%" }}
           >
-            <img className="o-teaser__image" src={imageUrl} alt="" />
+            <img
+              className="o-teaser__image"
+              src={imageUrl}
+              alt="Financial Times"
+              onError={({ currentTarget }) => {
+                currentTarget.onerror = null; // prevents looping
+                currentTarget.src = "/images/screenshot.png";
+              }}
+            />
           </div>
         </div>
       </div>

@@ -1,83 +1,34 @@
-import React, { useEffect, useRef, useState } from "react";
 import Article from "./Article";
 import TopBaner from "./TopBaner";
-import _ from "lodash";
-import { useAuth } from "../context/userContext";
-import { IArticle } from "../interfaces/artticleInterface";
-import { Link, useNavigate } from "react-router-dom";
-import { fetchArticles } from "../utils/fetchArticles";
-import { useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Pagination from "./Pagination";
 import Loading from "../helpersComponent/Loading";
+import { useArticleData } from "../customHooks/useArticleData";
+import "../styles/home.scss";
 
 function Home() {
   window.scrollTo(0, 0);
-  const navigate = useNavigate();
-  const delayTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated } = useAuth();
-  const { pageNumber } = useParams();
-  const pageFromUrl = Number(pageNumber);
-
-  const [currPage, setCurrPage] = useState<number>(1);
-  const [allArticles, setAllArticles] = useState<IArticle[]>([]);
-  const [queryString, setQueryString] = useState<string>("");
-
-  const handleNextPage = () => {
-    const nextPage = pageFromUrl + 1;
-    setCurrPage(nextPage);
-    navigate(`/articles/page/${nextPage}`);
-  };
-
-  const handlePrevPage = () => {
-    if (pageFromUrl > 1) {
-      const prevPage = pageFromUrl - 1;
-      setCurrPage(prevPage);
-      navigate(`/articles/page/${prevPage}`);
-    }
-  };
-
-  useEffect(() => {
-    setIsLoading(true);
-    async function fetchData() {
-      if (queryString) {
-        if (delayTimerRef.current) {
-          clearTimeout(delayTimerRef.current);
-        }
-
-        delayTimerRef.current = setTimeout(async () => {
-          const response = await fetchArticles(queryString, pageFromUrl);
-          setAllArticles(response);
-        }, 1000);
-      } else {
-        const response = await fetchArticles(queryString, pageFromUrl);
-        setAllArticles(response);
-      }
-
-      return () => {
-        if (delayTimerRef.current) {
-          clearTimeout(delayTimerRef.current);
-        }
-      };
-    }
-    fetchData();
-    setIsLoading(false);
-  }, [queryString, pageFromUrl, currPage]);
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setQueryString(event.target.value);
-  };
-
-  const totalPages = 6;
+  const {
+    isLoading,
+    isAuthenticated,
+    currPage,
+    allArticles,
+    queryString,
+    hasError,
+    handleNextPage,
+    handlePrevPage,
+    handleSearchChange,
+    totalPages,
+  } = useArticleData();
 
   return (
     <>
-      <div className="o-layout" data-o-component="o-layout">
+      <div className="o-layout home" data-o-component="o-layout">
         <div className="o-layout__header"></div>
         <div className="o-layout__main ">
           {!isAuthenticated && <TopBaner />}
           <div data-o-component="o-syntax-highlight">
-            {isAuthenticated && (
+            {isAuthenticated && allArticles.length > 0 && (
               <div className="col-md-4">
                 <div className="sidebar pt-4">
                   <h3>Search News</h3>
@@ -97,8 +48,10 @@ function Home() {
             <br className="demo-break" />
             <h3 id="sub-section-2">Latest News</h3>
             <div>
-              <div className="row">
-                {isLoading ? (
+              <div className="row articles">
+                {isLoading && !hasError ? (
+                  <Loading />
+                ) : allArticles.length === 0 ? (
                   <Loading />
                 ) : (
                   allArticles.map((article) => (
@@ -106,9 +59,8 @@ function Home() {
                   ))
                 )}
               </div>
-
               {/* Pagination controls */}
-              {isAuthenticated && (
+              {isAuthenticated && allArticles.length > 0 && (
                 <Pagination
                   currPage={currPage}
                   totalPages={totalPages}

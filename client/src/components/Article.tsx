@@ -55,19 +55,15 @@ function Article({ article }: { article: IArticle }) {
             className="o-teaser__image-placeholder"
             style={{ paddingBottom: "56.2500%" }}
           >
-            {imageUrl ? (
-              <img
-                className="o-teaser__image"
-                src={imageUrl}
-                alt="Financial Times"
-              />
-            ) : (
-              <img
-                className="o-teaser__image"
-                src="/images/screenshot.png"
-                alt="Financial Times"
-              />
-            )}
+            <img
+              className="o-teaser__image"
+              src={imageUrl}
+              alt="Financial Times"
+              onError={({ currentTarget }) => {
+                currentTarget.onerror = null; // prevents looping
+                currentTarget.src = "/images/screenshot.png";
+              }}
+            />
           </div>
         </Link>
       </div>
